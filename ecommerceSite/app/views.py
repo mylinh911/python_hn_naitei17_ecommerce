@@ -6,6 +6,7 @@ from django.contrib.auth.forms import UserCreationForm
 from .forms import CustomerForm
 from django.contrib import messages
 from django.contrib.auth import authenticate,login,logout
+from django.utils.translation import get_language, activate, gettext
 
 def check_user_id_in_session(request):
     customer_ids = Customer.objects.values_list('userID', flat=True)
@@ -30,21 +31,23 @@ def register(request):
         form = CustomerForm()
     return render(request, 'app/register.html', {'form': form, 'user_not_login':user_not_login, 'user_login':user_login})
 
-def home(request):
+def home(request, language = None):
+    cur_language = language or request.LANGUAGE_CODE
+    activate(cur_language)
     customer_ids = Customer.objects.values_list('userID', flat=True)
     session_values = request.session.values()
-    
+    products = Product.objects.filter(featured=True)
     for value in session_values:
         if value in customer_ids:
             customer = Customer.objects.get(userID=value)
             user_not_login = "hidden"
             user_login = "show"
-            context = {'user_name':customer.full_name, 'user_not_login':user_not_login, 'user_login':user_login}
+            context = {'products': products,'user_name':customer.full_name, 'user_not_login':user_not_login, 'user_login':user_login}
             return render(request,'app/home.html',context)
     
     user_not_login = "show"
     user_login = "hidden"
-    context = {'user_not_login':user_not_login, 'user_login':user_login}
+    context = {'products': products,'user_not_login':user_not_login, 'user_login':user_login}
     return render(request,'app/home.html',context)
 
 def loginPage(request):
