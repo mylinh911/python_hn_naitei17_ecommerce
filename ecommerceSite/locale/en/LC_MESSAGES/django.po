@@ -1,0 +1,79 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2023-05-12 07:01+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: app/templates/app/base.html:46
+msgid "Trang chủ"
+msgstr "Home"
+
+#: app/templates/app/base.html:51
+msgid "Ngôn ngữ"
+msgstr "Language"
+
+#: app/templates/app/base.html:70
+msgid "Tất cả sản phẩm"
+msgstr "All products"
+
+#: app/templates/app/base.html:73
+msgid "Trang điểm"
+msgstr "Makeup"
+
+#: app/templates/app/base.html:74
+msgid "Chăm sóc da"
+msgstr "Skincare"
+
+#: app/templates/app/base.html:81
+msgid "Liên hệ"
+msgstr "Contact"
+
+#: app/templates/app/base.html:86
+msgid "Xin chào"
+msgstr "Hello"
+
+#: app/templates/app/base.html:87
+msgid "Đăng xuất"
+msgstr "Logout"
+
+#: app/templates/app/base.html:91
+msgid "Đăng nhập"
+msgstr "Login"
+
+#: app/templates/app/base.html:92
+msgid "Đăng ký"
+msgstr "Register"
+
+#: app/templates/app/home.html:47
+msgid "Thêm vào giỏ hàng"
+msgstr "Add to cart"
+
+#: app/templates/app/home.html:48
+msgid "Xem"
+msgstr "View"
+
+#: ecommerceSite/settings.py:149
+msgid "English"
+msgstr ""
+
+#: ecommerceSite/settings.py:150
+msgid "Vienamese"
+msgstr ""
+
+#: ecommerceSite/urls.py:24
+msgid "admin/"
+msgstr ""
