@@ -1,4 +1,5 @@
 {% extends 'app/base.html' %}
+{% load i18n %}
 {% load static %}
 <!DOCTYPE html>
 <!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
@@ -86,3 +87,7 @@
         <script src="" async defer></script>
     </body>
 </html>
+{% endblock all-products%}
+{% block language %}
+{% include "app/language.html" with var="register" %}
+{% endblock language %}
