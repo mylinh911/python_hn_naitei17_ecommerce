@@ -1,0 +1,42 @@
+{% extends 'app/base.html' %}
+{% load static %}
+{% load i18n %}
+{% block order_list %}
+<div class="box-element">
+    <div class="cart-row">
+        <div style="flex:2"><strong>Thời gian đặt hàng</strong></div>
+        <div style="flex:1"><strong>Trạng thái</strong></div>
+        <div style="flex:1"><strong>Tổng tiền</strong></div>
+        <div style="flex:1"></strong></div>
+    </div>
+</div>  
+{% for order in orders %}
+<div style = "border: 1px solid black; padding: 10px; margin-bottom: 20px;">
+    <div class="cart-row">
+        <div style="flex:2"><p>{{ order.order_date }}</p></div>
+        <div style="flex:1"><p>{{ order.status }}</p></div>
+        <div style="flex:1"><p>{{ order.get_cart_total }}</p></div>
+        <div style="flex:1">
+            <form id="form" method='POST'>
+                {% csrf_token %}
+                <button type="submit" class="btn btn-danger">Hủy đơn</button>
+            </form>
+        </div>
+    </div>
+    <h5>Chi tiết đơn hàng</h5>
+    {% for item in order.orderdetail_set.all %}
+        <div class="cart-row">
+            <div style="flex:1"></div>
+            <div style="flex:2"><img class="row-image" src="{{ item.product.ImageURL }}"></div>
+            <div style="flex:2"><p>{{ item.product.name }}</p></div>
+            <div style="flex:1"><p>{{ item.product.price }}</p></div>
+            <div style="flex:1"><p>{{ item.quantity }}</p></div>
+            <div style="flex:1"><p>{{ item.get_total }}</p></div>
+        </div>
+    {% endfor %}
+</div>
+{% endfor %}
+{% endblock order_list %}
+{% block language %}
+{% include "app/language.html" with var="orderlist" %}
+{% endblock language %}

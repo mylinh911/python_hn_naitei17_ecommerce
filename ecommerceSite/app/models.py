@@ -12,6 +12,7 @@ class Customer(models.Model):
     full_name = models.CharField(max_length=100)
     address = models.CharField(max_length=200)
     phone = models.CharField(max_length=10)
+    
 
     def check_password(self, password):
         if (self.password==password):
@@ -52,10 +53,20 @@ class Product(models.Model):
         return url
 
 class Order(models.Model):
+    ORDER_STATUS_CHOICES = [
+        ('cart', 'Giỏ hàng'),
+        ('demo', 'Xem trước'),
+        ('pending', 'Đang chờ xử lý'),
+        ('shipped', 'Đã gửi hàng'),
+        ('delivered', 'Đã giao hàng'),
+        ('canceled', 'Đã hủy'),
+    ]
+
     orderID = models.AutoField(primary_key=True)
     customer = models.ForeignKey(Customer, on_delete=models.CASCADE)
     order_date = models.DateTimeField(auto_now_add=True)
-    status = models.CharField(max_length=50)  
+    status = models.CharField(max_length=50, choices=ORDER_STATUS_CHOICES, default='cart') 
+    shipping_address = models.CharField(max_length=100, default='')
 
     def __str__(self):
         return str(self.pk)
