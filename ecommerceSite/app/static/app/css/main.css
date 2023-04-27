@@ -119,3 +119,26 @@ h1,h2,h3,h4,h5,h6{
 	align-items: center;
 	color: red;
 }
+
+.message-container {
+	position: fixed;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+	background-color: #fff;
+	border: 2px solid #000;
+	padding: 10px;
+	box-shadow: 0px 0px 10px #000;
+  }
+  
+.message {
+font-size: 18px;
+font-weight: bold;
+}
+  
+.order-container {
+	border: 1px solid #ccc;
+	padding: 10px;
+	margin-bottom: 20px;
+  }
+  
