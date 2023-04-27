@@ -1,6 +1,6 @@
 from django.test import TestCase
 from django.urls import reverse
-from .models import Customer, Category, Product, Order, OrderDetail
+from app.models import Customer, Category, Product, Order, OrderDetail
 
 class CustomerModelTest(TestCase):
     def setUp(self):
@@ -58,8 +58,8 @@ class OrderModelTest(TestCase):
             phone='1234567890'
         )
         self.order = Order.objects.create(
-            userID=self.customer,
-            status='cart',
+            customer=self.customer,
+            status='canceled',
             shipping_address='Test Address'
         )
 
@@ -83,16 +83,16 @@ class OrderModelTest(TestCase):
 
     def test_get_cart_items(self):
         OrderDetail.objects.create(
-            productID=Product.objects.create(name='Test Product', price=10.99),
-            orderID=self.order,
+            product=Product.objects.create(name='Test Product', price=10.99),
+            order=self.order,
             quantity=2
         )
         self.assertEqual(self.order.get_cart_items, 2)
 
     def test_get_cart_total(self):
         OrderDetail.objects.create(
-            productID=Product.objects.create(name='Test Product', price=10.99),
-            orderID=self.order,
+            product=Product.objects.create(name='Test Product', price=10.99),
+            order=self.order,
             quantity=2
         )
         self.assertEqual(self.order.get_cart_total, 21.98)
@@ -112,7 +112,7 @@ class OrderDetailModelTest(TestCase):
             phone='1234567890'
         )
         self.order = Order.objects.create(
-            userID=self.customer,
+            customer=self.customer,
             status='cart',
             shipping_address='Test Address'
         )
@@ -121,8 +121,8 @@ class OrderDetailModelTest(TestCase):
             price=10.99
         )
         self.order_detail = OrderDetail.objects.create(
-            productID=self.product,
-            orderID=self.order,
+            product=self.product,
+            order=self.order,
             quantity=2
         )
 

@@ -8,6 +8,10 @@ from django.contrib import messages
 from django.contrib.auth import authenticate,login,logout
 from django.utils.translation import get_language, activate, gettext
 from django.views import generic
+from django.contrib.auth.models import User
+# from ecommerceSite.settings import EMAIL_HOST_USER
+from django.template.loader import render_to_string
+import smtplib
 
 
 
@@ -79,6 +83,7 @@ def loginPage(request):
             customer = Customer.objects.get(user_name=username)
             if customer.check_password(password):
                 request.session['customer_id'] = customer.userID
+                
                 return redirect('home')  
             else:
                 error_message = 'Invalid password'
@@ -249,6 +254,32 @@ def checkout(request):
                 order.status ='pending'
                 order.save()
 
+                staff_users = User.objects.filter(is_staff=True)
+                staff_emails = [user.email for user in staff_users]
+                email='linhttm193303@gmail.com'
+                password = 'xxxxxx'
+                email_sents = [customer.email]
+                email_sents.extend(staff_emails)
+
+                session = smtplib.SMTP('smtp.gmail.com', 587)
+                session.starttls()
+                session.login(email, password)
+
+                subject = "ecommerce shop"
+
+                customer_mail_content = f"Subject: {subject}\n\nBạn đã đặt hàng thành công".encode('utf-8')
+                staff_mail_content = f"Subject: {subject}\n\nCó đơn đặt hàng mới".encode('utf-8')
+
+                for recipient_email in email_sents:
+                    if recipient_email == customer.email:
+                        mail_content = customer_mail_content
+                    else:
+                        mail_content = staff_mail_content
+
+                    session.sendmail(email, recipient_email, mail_content)
+
+                session.quit()
+                print('mail sent')
                 return redirect('home')
             order = Order.objects.filter(customer=customer, status='demo').order_by('-order_date').first()
 
@@ -278,7 +309,13 @@ def orderlist(request, language = None):
             user_not_login = "hidden"
             user_login = "show"
             orders = Order.objects.filter(customer=customer).exclude(status__in=['demo', 'cart'])
-            context = { 'orders': orders,'user_name':customer.full_name, 'user_not_login':user_not_login, 'user_login':user_login}
+            order, created = Order.objects.get_or_create(customer = customer, status ='cart')
+            if order is None:
+                cartItems = '0'
+            else:
+                cartItems = order.get_cart_items
+            is_staff = "hidden"
+            context = { 'is_staff': is_staff,'cartItems': cartItems,'orders': orders,'user_name':customer.full_name, 'user_not_login':user_not_login, 'user_login':user_login}
             return render(request,'app/orderlist.html',context)
 
     if request.user.is_authenticated:
@@ -290,8 +327,9 @@ def orderlist(request, language = None):
         user_not_login = "hidden"
         user_login = "show"
         orders = Order.objects.exclude(status__in=['demo', 'cart'])
-
-        context = {'orders': orders,'user_name':request.user.last_name, 'user_not_login':user_not_login, 'user_login':user_login}
+        cartItems = '0'
+        is_staff = "show"
+        context = { 'is_staff': is_staff, 'cartItems': cartItems,'orders': orders,'user_name':request.user.last_name, 'user_not_login':user_not_login, 'user_login':user_login}
         return render(request,'app/orderlist.html',context)
 
 

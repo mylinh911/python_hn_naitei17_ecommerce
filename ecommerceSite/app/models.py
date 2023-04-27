@@ -108,6 +108,9 @@ class OrderDetail(models.Model):
         total = self.product.price * self.quantity
         return total
 
+    def __str__(self):
+        return str(self.pk)
+
 
 
 
