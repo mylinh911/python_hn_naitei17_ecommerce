@@ -33,6 +33,7 @@ class Product(models.Model):
     name = models.CharField(max_length=200,null=True)
     price = models.FloatField()
     image = models.ImageField(null=True,blank=True)
+    featured = models.BooleanField(default=False, null=True, blank=False)
     
     def __str__(self):
         return self.name

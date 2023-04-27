@@ -1,4 +1,5 @@
 {% extends 'app/base.html' %}
+{% load i18n %}
 {% load static %}
 <!DOCTYPE html>
 <!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
@@ -41,7 +42,7 @@
                               <i class="fas fa-lock fa-lg me-3 fa-fw"></i>
                               <div class="form-outline flex-fill mb-0">
                                 <label class="form-label" for="form3Example4c">Password</label>
-                                <input type="text" name='password' id="form3Example1c" class="form-control" />
+                                <input type="password" name='password' id="form3Example1c" class="form-control" />
                               </div>
                             </div>
 
@@ -72,3 +73,22 @@
         <script src="" async defer></script>
     </body>
 </html>
+{% block language %}
+  <li class="nav-item dropdown">
+    <a class="nav-link dropdown-toggle" href="#" style="white-space: nowrap;" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+      {% translate "Ngôn ngữ" %}
+    </a>
+    <ul class="dropdown-menu">
+        {% get_current_language as LANGUAGE_CODE %}
+        {% get_available_languages as LANGUAGES %}
+        {% get_language_info_list for LANGUAGES as languages %}
+
+        {% for lang in languages%}
+        <li>
+          <a class="dropdown-item" href="/{{ lang.code }}/login">
+            {{ lang.name_local }}
+        </li>
+        {% endfor %}
+    </ul>
+  </li>
+{% endblock language %}
