@@ -1,0 +1,70 @@
+{% extends 'app/base.html' %}
+{% load static %}
+{% load i18n %}
+{% block order-cancel-detail %}
+<div class="box-element">
+  <div class="cart-row">
+      <div style="flex:2"><strong>Thời gian đặt hàng</strong></div>
+      <div style="flex:1"><strong>Trạng thái</strong></div>
+      <div style="flex:1"><strong>Tổng tiền</strong></div>
+      <div style="flex:1"></strong></div>
+  </div>
+</div>  
+
+<div style = "border: 1px solid black; padding: 10px; margin-bottom: 20px;">
+  <div class="cart-row">
+      <div style="flex:2"><p>{{ order.order_date }}</p></div>
+      <div style="flex:1"><p>{{ order.status }}</p></div>
+      <div style="flex:1"><p>{{ order.get_cart_total }}</p></div>
+      <div style="flex:1">      </div>
+  </div>
+  <h5>Chi tiết đơn hàng</h5>
+  {% for item in order.orderdetail_set.all %}
+      <div class="cart-row">
+          <div style="flex:1"></div>
+          <div style="flex:2"><img class="row-image" src="{{ item.product.ImageURL }}"></div>
+          <div style="flex:2"><p>{{ item.product.name }}</p></div>
+          <div style="flex:1"><p>{{ item.product.price }}</p></div>
+          <div style="flex:1"><p>{{ item.quantity }}</p></div>
+          <div style="flex:1"><p>{{ item.get_total }}</p></div>
+      </div>
+  {% endfor %}
+  {% if order.status == 'pending' %}
+        <form id="form-{{ order.orderID }}" method="POST">
+            {% csrf_token %}
+            <div id="cancel-form-{{ order.orderID }}">
+                <label for="reason-{{ order.orderID }}">Lí do hủy:</label>
+                <input type="text" id="reason-{{ order.orderID }}" name="reason" required>
+                <button type="submit" class="btn btn-danger" name="cancel_order">Xác nhận hủy</button>
+            </div>
+        </form>
+  {% endif %}
+</div>
+{% if messages %}
+    <ul class="messages">
+        {% for message in messages %}
+            <li {% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+        {% endfor %}
+    </ul>
+{% endif %}
+
+{% endblock order-cancel-detail %}
+{% comment %} {% block language %}
+  <li class="nav-item dropdown">
+    <a class="nav-link dropdown-toggle" href="#" style="white-space: nowrap;" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+      {% translate "Ngôn ngữ" %}
+    </a>
+    <ul class="dropdown-menu">
+        {% get_current_language as LANGUAGE_CODE %}
+        {% get_available_languages as LANGUAGES %}
+        {% get_language_info_list for LANGUAGES as languages %}
+
+        {% for lang in languages%}
+        <li>
+          <a class="dropdown-item" href="/{{ lang.code }}/product/{{product.productID}}">
+            {{ lang.name_local }}
+        </li>
+        {% endfor %}
+    </ul>
+  </li>
+{% endblock language %} {% endcomment %}

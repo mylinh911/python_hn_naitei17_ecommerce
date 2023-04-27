@@ -37,6 +37,7 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    # 'send_email.apps.SendEmailConfig'
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -134,7 +135,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 SESSION_ENGINE = 'django.contrib.sessions.backends.db'
 
 STATICFILES_DIRS = [
-    os.path.join(BASE_DIR,'static')
+    os.path.join(BASE_DIR,'app/static')
 ]
 MEDIA_URL ='/images/'
 
@@ -153,3 +154,11 @@ LANGUAGES = (
 LOCALE_PATHS = (
     os.path.join(BASE_DIR, 'locale/'),
 )
+
+# EMAIL_BACKEND ="django.core.mail.backends.smtp.EmailBackend"
+# EMAIL_HOST ="smtp.gmail.com"
+# EMAIL_USE_TLS = True
+# EMAIL_USE_SSL = False
+# EMAIL_PORT = 587
+# EMAIL_HOST_USER = "linhttm193303@gmail.com"
+# EMAIL_HOST_PASSWORD = "nloilvhqodlzrfnj"
