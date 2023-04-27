@@ -13,6 +13,8 @@ from django.contrib.auth.models import User
 from django.template.loader import render_to_string
 import smtplib
 
+
+
 def check_user_id_in_session(request):
     customer_ids = Customer.objects.values_list('userID', flat=True)
     session_values = request.session.values()
@@ -37,7 +39,6 @@ def register(request):
     return render(request, 'app/register.html', {'form': form, 'user_not_login':user_not_login, 'user_login':user_login})
 
 def home(request, language = None):
-
     Order.objects.filter(status='demo').delete()
     cur_language = language or request.LANGUAGE_CODE
     activate(cur_language)
@@ -150,6 +151,7 @@ class ProductDetailView(generic.DetailView):
 
         user_not_login = "show"
         user_login = "hidden"
+        context ['cartItems']=0
         context['user_not_login'] = user_not_login
         context['user_login'] = user_login
         return context
@@ -161,21 +163,34 @@ def cart(request):
     for value in session_values:
         if value in customer_ids:
             customer = Customer.objects.get(userID=value)
-            order, created = Order.objects.get_or_create(customer = customer, status ='cart')
+            order, created = Order.objects.get_or_create(customer=customer, status='cart')
             items = order.orderdetail_set.all()
             user_not_login = "hidden"
             user_login = "show"
             cartItems = order.get_cart_items
-            context = { 'cartItems': cartItems,'items':items, 'order': order, 'user_name':customer.full_name, 'user_not_login':user_not_login, 'user_login':user_login}
-            return render(request,'app/cart.html',context)
-    
+            context = {
+                'cartItems': cartItems,
+                'items': items,
+                'order': order,
+                'user_name': customer.full_name,
+                'user_not_login': user_not_login,
+                'user_login': user_login
+            }
+            return render(request, 'app/cart.html', context)
+
     user_not_login = "show"
     user_login = "hidden"
     items = []
-    order = {'get_cart_items':0, 'get_cart_total':0}
+    order = Order()
     cartItems = order.get_cart_items
-    context = {'items':items, 'cartItems': cartItems,'order': order,'user_not_login':user_not_login, 'user_login':user_login}
-    return render(request,'app/cart.html',context)
+    context = {
+        'items': items,
+        'cartItems': cartItems,
+        'order': order,
+        'user_not_login': user_not_login,
+        'user_login': user_login
+    }
+    return render(request, 'app/cart.html', context)
 
 def updateItem(request):
     customer_ids = Customer.objects.values_list('userID', flat=True)

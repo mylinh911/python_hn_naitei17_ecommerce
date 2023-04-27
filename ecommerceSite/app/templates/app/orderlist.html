@@ -4,9 +4,11 @@
 {% block order_list %}
 <div class="box-element">
     <div class="cart-row">
-            <div style="flex:1;visibility: {{is_staff}};"><strong>Mã khách hàng</strong></div>
-            <div style="flex:1;visibility: {{is_staff}};"><strong>Tên khách hàng</strong></div>
-            <div style="flex:1;visibility: {{is_staff}}";><strong>SĐT khách hàng</strong></div>
+        {% if user.is_staff %}
+            <div style="flex:1"><strong>Mã khách hàng</strong></div>
+            <div style="flex:1"><strong>Tên khách hàng</strong></div>
+            <div style="flex:1"><strong>SĐT khách hàng</strong></div>
+        {% endif %}
         <div style="flex:2"><strong>Thời gian đặt hàng</strong></div>
         <div style="flex:1"><strong>Trạng thái</strong></div>
         <div style="flex:1"><strong>Tổng tiền</strong></div>
@@ -17,21 +19,25 @@
 {% for order in orders %}
 <div style = "border: 1px solid black; padding: 10px; margin-bottom: 20px;">
     <div class="cart-row">
-            <div style="flex:1;visibility: {{is_staff}};"><p>{{ order.customer.userID }}</p></div>
-            <div style="flex:1;visibility: {{is_staff}};"><p>{{ order.customer.full_name }}</p></div>
-            <div style="flex:1;visibility: {{is_staff}};"><p>{{ order.customer.phone }}</p></div>
+        {% if user.is_staff %}
+            <div style="flex:1"><p>{{ order.customer.userID }}</p></div>
+            <div style="flex:1"><p>{{ order.customer.full_name }}</p></div>
+            <div style="flex:1"><p>{{ order.customer.phone }}</p></div>
+        {% endif %}
         <div style="flex:2"><p>{{ order.order_date }}</p></div>
         <div style="flex:1"><p>{{ order.status }}</p></div>
         <div style="flex:1"><p>{{ order.get_cart_total }}</p></div>
         <div style="flex:1">
             {% if order.status == "pending" %}
-                <div style="display: flex; gap: 10px; ">
+                <div style="display: flex; gap: 10px;">
                     <a class="btn btn-danger" href="{{ order.get_absolute_url }}">{% translate "Hủy đơn" %}</a>
-                    <form style = "visibility: {{is_staff}};" action="{% url 'orderlist' %}" method="POST">
+                    {% if user.is_staff %}
+                    <form action="{% url 'orderlist' %}" method="POST">
                         {% csrf_token %}
                         <input type="hidden" name="order_id" value="{{ order.orderID }}">
                         <button type="submit" class="btn btn-success">{% translate "Giao hàng" %}</button>
                     </form>
+                    {% endif %}
                 </div>
             {% endif %}
 
