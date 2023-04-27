@@ -68,7 +68,6 @@ def home(request, language = None):
 
 def loginPage(request):
     Order.objects.filter(status='demo').delete()
-    Order.objects.filter(status='demo').delete()
     user_not_login = "hidden"
     user_login = "hidden"
     
@@ -80,16 +79,10 @@ def loginPage(request):
         if user is not None:
             login(request, user)
             return redirect('home')
-        user = authenticate(request, username=username, password=password)
-        
-        if user is not None:
-            login(request, user)
-            return redirect('home')
         try:
             customer = Customer.objects.get(user_name=username)
             if customer.check_password(password):
                 request.session['customer_id'] = customer.userID
-                
                 
                 return redirect('home')  
             else:
@@ -105,11 +98,15 @@ def logoutPage(request):
     Order.objects.filter(status='demo').delete()
     if request.user.is_authenticated:
         logout(request)
+    Order.objects.filter(status='demo').delete()
+    if request.user.is_authenticated:
+        logout(request)
     if 'customer_id' in request.session:
         del request.session['customer_id']
     return redirect('login')
 
 def productList(request):
+    Order.objects.filter(status='demo').delete()
     Order.objects.filter(status='demo').delete()
     customer_ids = Customer.objects.values_list('userID', flat=True)
     session_values = request.session.values()
@@ -121,9 +118,7 @@ def productList(request):
             user_login = "show"
             order, created = Order.objects.get_or_create(customer = customer, status ='cart')
             cartItems = order.get_cart_items
-            order, created = Order.objects.get_or_create(customer = customer, status ='cart')
-            cartItems = order.get_cart_items
-            context = { 'cartItems': cartItems, 'cartItems': cartItems,'products': products,'user_name':customer.full_name, 'user_not_login':user_not_login, 'user_login':user_login}
+            context = { 'cartItems': cartItems,'products': products,'user_name':customer.full_name, 'user_not_login':user_not_login, 'user_login':user_login}
             return render(request,'app/product.html',context)
     
     user_not_login = "show"
@@ -136,8 +131,6 @@ def productList(request):
 #     return render(request, 'app/product_detail.html', context={'product': product})
 
 class ProductDetailView(generic.DetailView):
-    Order.objects.filter(status='demo').delete()
-
     Order.objects.filter(status='demo').delete()
 
     model = Product
@@ -587,6 +580,9 @@ class OrderDetailView(generic.DetailView):
                 context['user_name'] = customer.full_name
                 context['user_not_login'] = user_not_login
                 context['user_login'] = user_login
+                order, created = Order.objects.get_or_create(customer = customer, status ='cart')
+                cartItems = order.get_cart_items
+                context ['cartItems']= cartItems
                 return context
 
         user_not_login = "show"
