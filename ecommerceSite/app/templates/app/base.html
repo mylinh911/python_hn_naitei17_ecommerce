@@ -61,23 +61,14 @@
                   <li class="nav-item">
                     <a class="nav-link active" aria-current="page" style="white-space: nowrap;" href="{% url 'home' %}">{% translate "Trang chủ" %}</a>
                   </li>
+
+                  
+                  </li>
                   <li class="nav-item">
                     <a class="nav-link active" aria-current="page" style="white-space: nowrap;" href="{% url 'products' %}">{% translate "Tất cả sản phẩm" %}</a>
                   </li>
                   {% block language %}{% endblock language %}
                   
-                  {% comment %} <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" style="white-space: nowrap;" href="{% url 'products' %}" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                      {% translate "Tất cả sản phẩm" %}
-                    </a>
-                    <ul class="dropdown-menu">
-                      <li><a class="dropdown-item" href="#">{% translate "Trang điểm" %}</a></li>
-                      <li><a class="dropdown-item" href="#">{% translate "Chăm sóc da" %}</a></li>
-                    </ul>
-                  </li> {% endcomment %}
-
-                  
-                  </li>
                   <li class="nav-item">
                     <a class="nav-link" style="white-space: nowrap;" href="#">{% translate "Liên hệ" %}</a>
                   </li>
