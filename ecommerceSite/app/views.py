@@ -33,6 +33,7 @@ def register(request):
     return render(request, 'app/register.html', {'form': form, 'user_not_login':user_not_login, 'user_login':user_login})
 
 def home(request, language = None):
+    Order.objects.filter(status='demo').delete()
     cur_language = language or request.LANGUAGE_CODE
     activate(cur_language)
     customer_ids = Customer.objects.values_list('userID', flat=True)
@@ -43,7 +44,7 @@ def home(request, language = None):
             customer = Customer.objects.get(userID=value)
             user_not_login = "hidden"
             user_login = "show"
-            order, created = Order.objects.get_or_create(customer = customer)
+            order, created = Order.objects.get_or_create(customer = customer, status ='cart')
             cartItems = order.get_cart_items
             context = { 'cartItems': cartItems,'products': products,'user_name':customer.full_name, 'user_not_login':user_not_login, 'user_login':user_login}
             return render(request,'app/home.html',context)
@@ -54,6 +55,7 @@ def home(request, language = None):
     return render(request,'app/home.html',context)
 
 def loginPage(request):
+    Order.objects.filter(status='demo').delete()
     user_not_login = "hidden"
     user_login = "hidden"
     
@@ -75,11 +77,13 @@ def loginPage(request):
 
 
 def logoutPage(request):
+    Order.objects.filter(status='demo').delete()
     if 'customer_id' in request.session:
         del request.session['customer_id']
     return redirect('login')
 
 def productList(request):
+    Order.objects.filter(status='demo').delete()
     customer_ids = Customer.objects.values_list('userID', flat=True)
     session_values = request.session.values()
     products = Product.objects.all()
@@ -88,7 +92,7 @@ def productList(request):
             customer = Customer.objects.get(userID=value)
             user_not_login = "hidden"
             user_login = "show"
-            order, created = Order.objects.get_or_create(customer = customer)
+            order, created = Order.objects.get_or_create(customer = customer, status ='cart')
             cartItems = order.get_cart_items
             context = { 'cartItems': cartItems,'products': products,'user_name':customer.full_name, 'user_not_login':user_not_login, 'user_login':user_login}
             return render(request,'app/product.html',context)
@@ -103,6 +107,8 @@ def productList(request):
 #     return render(request, 'app/product_detail.html', context={'product': product})
 
 class ProductDetailView(generic.DetailView):
+    Order.objects.filter(status='demo').delete()
+
     model = Product
 
     def get_context_data(self, **kwargs):
@@ -120,7 +126,7 @@ class ProductDetailView(generic.DetailView):
                 context['user_name'] = customer.full_name
                 context['user_not_login'] = user_not_login
                 context['user_login'] = user_login
-                order, created = Order.objects.get_or_create(customer = customer)
+                order, created = Order.objects.get_or_create(customer = customer, status ='cart')
                 cartItems = order.get_cart_items
                 context ['cartItems']= cartItems
                 return context
@@ -132,12 +138,13 @@ class ProductDetailView(generic.DetailView):
         return context
 
 def cart(request):
+    Order.objects.filter(status='demo').delete()
     customer_ids = Customer.objects.values_list('userID', flat=True)
     session_values = request.session.values()
     for value in session_values:
         if value in customer_ids:
             customer = Customer.objects.get(userID=value)
-            order, created = Order.objects.get_or_create(customer = customer)
+            order, created = Order.objects.get_or_create(customer = customer, status ='cart')
             items = order.orderdetail_set.all()
             user_not_login = "hidden"
             user_login = "show"
@@ -163,18 +170,88 @@ def updateItem(request):
     data = json.loads(request.body)
     productId = data['productId']
     action = data['action']
-    product = Product.objects.get(productID = productId)
-    order, created = Order.objects.get_or_create(customer= customer)
-    orderItem, created = OrderDetail.objects.get_or_create(order= order, product = product)
+    quantity = int(data.get('quantity', 0))
+    product = Product.objects.get(productID=productId)
+    order, created = Order.objects.get_or_create(customer=customer, status ='cart')
+    orderItem, created = OrderDetail.objects.get_or_create(order=order, product=product)
     if action == 'add':
-        orderItem.quantity+=1
+        orderItem.quantity += quantity
     elif action == 'remove':
-        orderItem.quantity-=1
+        orderItem.quantity -= 1
     orderItem.save()
-    if orderItem.quantity <=0 :
+    if action == 'delete':
+        orderItem.delete()
+    if orderItem.quantity <= 0:
         orderItem.delete()
 
-    return JsonResponse({'status': 'success'},safe = False)
+    return JsonResponse({'status': 'success'})
+
+def checkoutDemo(request):
+    customer_ids = Customer.objects.values_list('userID', flat=True)
+    session_values = request.session.values()
+    for value in session_values:
+        if value in customer_ids:
+            customer = Customer.objects.get(userID=value)
+            break
+    data = json.loads(request.body)
+    orderQuantityList = data['orderQuantityList']
+    orderProductList = data['orderProductList']
+
+    order = Order.objects.create(customer=customer, status='demo')
+
+    for i in range(len(orderQuantityList)):
+        product = Product.objects.get(productID=orderProductList[i])
+        quantity = orderQuantityList[i]
+        OrderDetail.objects.create(order=order, product=product, quantity=quantity)
+
+    return JsonResponse({'status': 'success'})
+
+
+def checkout(request):
+    user_not_login = "hidden"
+    user_login = "show"
+    customer_ids = Customer.objects.values_list('userID', flat=True)
+    session_values = request.session.values()
+    
+    for value in session_values:
+        if value in customer_ids:
+            customer = Customer.objects.get(userID=value)
+            if request.method == 'POST':
+                province = request.POST.get('province')
+                district = request.POST.get('district')
+                commune = request.POST.get('commune')
+                house_number = request.POST.get('house_number')
+
+                information = house_number + ', ' + commune + ', ' + district + ', ' + province
+
+                order = Order.objects.filter(customer=customer, status='demo').order_by('-order_date').first()
+                cart = Order.objects.get(customer=customer, status='cart')
+                cart_items = cart.orderdetail_set.all()
+                pending_order = order.orderdetail_set.all()
+                for cart_item in cart_items:
+                    if pending_order.filter(product=cart_item.product).exists():
+                        cart_item.delete()
+                order.shipping_address = information
+                print(information)
+                order.status ='pending'
+                order.save()
+
+                return redirect('home')
+            order = Order.objects.filter(customer=customer, status='demo').order_by('-order_date').first()
+
+            items = order.orderdetail_set.all()
+            user_not_login = "hidden"
+            user_login = "show"
+            cartItems = order.get_cart_items
+            context = { 'cartItems': cartItems,'items':items, 'order': order, 'user_name':customer.full_name, 'user_not_login':user_not_login, 'user_login':user_login}
+            return render(request,'app/checkout.html',context)
+
+    
+    items = []
+    order = {'get_cart_items':0, 'get_cart_total':0}
+    cartItems = order['get_cart_items']
+    context = {'items': items, 'cartItems':cartItems , 'user_not_login':user_not_login, 'user_login':user_login  }
+    return render(request,'app/checkout.html',context)
 
     
 
