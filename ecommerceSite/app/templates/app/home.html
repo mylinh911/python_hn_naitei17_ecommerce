@@ -1,5 +1,59 @@
 {% extends 'app/base.html' %}
+{% load i18n %}
 {% load static %}
-{% block home %}
-<h1>Home</h1>
-{% endblock home %}
+{% block banner_slider %}
+<div id="carouselExampleDark" class="carousel carousel-dark slide" data-bs-ride="carousel">
+    <div class="carousel-indicators">
+      <button type="button" data-bs-target="#carouselExampleDark" data-bs-slide-to="0" class="active" aria-current="true" aria-label="Slide 1"></button>
+      <button type="button" data-bs-target="#carouselExampleDark" data-bs-slide-to="1" aria-label="Slide 2"></button>
+      <button type="button" data-bs-target="#carouselExampleDark" data-bs-slide-to="2" aria-label="Slide 3"></button>
+      <button type="button" data-bs-target="#carouselExampleDark" data-bs-slide-to="3" aria-label="Slide 4"></button>
+    </div>
+    <div class="carousel-inner">
+      <div class="carousel-item active" data-bs-interval="10000">
+        <img src="{% static 'app/images/banner/macmac.jpg' %}" class="d-block w-100" alt="..." height='480'>
+      </div>
+      <div class="carousel-item" data-bs-interval="2000">
+        <img src="{% static 'app/images/banner/innis.jpg' %}" class="d-block w-100" alt="..." height='480'>
+      </div>
+      <div class="carousel-item" data-bs-interval="2000">
+        <img src="{% static 'app/images/banner/loreal-.jpg' %}" class="d-block w-100" alt="..." height='480'>
+      </div>
+      <div class="carousel-item" data-bs-interval="2000">
+        <img src="{% static 'app/images/banner/The-Face-Shop-2.jpg' %}" class="d-block w-100" alt="..." height='480'>
+      </div>
+      
+      </div>
+    </div>
+    <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleDark" data-bs-slide="prev">
+      <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+      <span class="visually-hidden">Previous</span>
+    </button>
+    <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleDark" data-bs-slide="next">
+      <span class="carousel-control-next-icon" aria-hidden="true"></span>
+      <span class="visually-hidden">Next</span>
+    </button>
+  </div>
+{% endblock banner_slider %}
+{% block main-content %}
+<hr>
+<a class="nav-link" href="{% url 'login' %}">Đăng nhập</a>
+<div class="container">
+  <div class="row" style="width: 100%; display: flex; justify-content: center;">
+    {% for product in products %}
+        <div class="col-lg-4">
+          <div class="box-element product">
+            <img style="margin: 0 auto; display: block; width: 350px; height: 350px;" src="{{product.ImageURL}}">
+            <h6><strong>{{product.name}}</strong></h6>  
+            <hr>
+            <button data-product="{{product.id}}" data-action="add" class="btn btn-outline-secondary add-btn update-cart">{% translate "Thêm vào giỏ hàng" %}</button>
+            <a class="btn btn-outline-success" href="#">{% translate "Xem" %}</a>
+            <h5 style="display: inline-block; float: right"><strong>${{product.price | floatformat:2 }}</strong></h5>
+          </div>
+        </div>
+    {% endfor %}
+  </div>
+</div>
+
+<br /><br /><br />
+{% endblock main-content%}

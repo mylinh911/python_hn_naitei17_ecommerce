@@ -1,4 +1,6 @@
 {%load static %}
+{% load i18n %}
+
 <!DOCTYPE html>
 <!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
 <!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
@@ -39,34 +41,51 @@
               <div class="collapse navbar-collapse" id="navbarSupportedContent">
                 <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                   <li class="nav-item">
-                    <a class="nav-link active" aria-current="page" href="{% url 'home' %}">Trang chủ</a>
+                    <a class="nav-link active" aria-current="page" style="white-space: nowrap;" href="{% url 'home' %}">{% translate "Trang chủ" %}</a>
+                  </li>
+
+                  <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" style="white-space: nowrap;" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                      {% translate "Ngôn ngữ" %}
+                    </a>
+                    <ul class="dropdown-menu">
+                        {% get_current_language as LANGUAGE_CODE %}
+                        {% get_available_languages as LANGUAGES %}
+                        {% get_language_info_list for LANGUAGES as languages %}
+
+                        {% for lang in languages%}
+                        <li>
+                          <a class="dropdown-item" href="/{{ lang.code }}/">
+                            {{ lang.name_local }}
+                        </li>
+
+                        {% endfor %}
+                    </ul>
                   </li>
                   
                   <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                      Sản phẩm
+                    <a class="nav-link dropdown-toggle" style="white-space: nowrap;" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                      {% translate "Tất cả sản phẩm" %}
                     </a>
                     <ul class="dropdown-menu">
-                      <li><a class="dropdown-item" href="#">Sữa</a></li>
-                      <li><a class="dropdown-item" href="#">Sữa</a></li>
-                      <li><a class="dropdown-item" href="#">Sữa</a></li>
-                      <li><a class="dropdown-item" href="#">Sữa</a></li>
+                      <li><a class="dropdown-item" href="#">{% translate "Trang điểm" %}</a></li>
+                      <li><a class="dropdown-item" href="#">{% translate "Chăm sóc da" %}</a></li>
                     </ul>
                   </li>
 
                   <li class="nav-item">
-                    <a class="nav-link" href="#">Liên hệ</a>
+                    <a class="nav-link" style="white-space: nowrap;" href="#">{% translate "Liên hệ" %}</a>
                   </li>
                 </ul>
 
                 <div class='form-inline my-2 my-lg-0' style = "visibility: {{user_login}}">
-                  <span>Hello! {{user_name}}</span>
-                  <span> <a href="{% url 'logout' %}">Logout</a></span>
+                  <span>{% translate "Xin chào" %} {{user_name}}</span>
+                  <span> <a href="{% url 'logout' %}">{% translate "Đăng xuất" %}</a></span>
                 </div>
 
                 <div class='form-inline my-2 my-lg-0' style = "visibility: {{user_not_login}}">
-                  <a class="nav-link" href="{% url 'login' %}">Đăng nhập</a>
-                  <a class="nav-link" href="{% url 'register' %}">Đăng ký</a>
+                  <a class="nav-link" href="{% url 'login' %}">{% translate "Đăng nhập" %}</a>
+                  <a class="nav-link" href="{% url 'register' %}">{% translate "Đăng ký" %}</a>
                 </div>
 
               </div>
@@ -76,9 +95,10 @@
         <script src="" async defer></script>
         <!-- main body -->
         {% block register %}{% endblock register %}
-        {% block login %}{% endblock login %}
         {% block home %}{% endblock home %}
+        {% block login %}{% endblock login %}
         {% block banner_slider %}{% endblock banner_slider %}
+        {% block main-content %}{% endblock main-content %}
         <!-- footer -->
         <footer class="container--fluid bg-success text-center fixed-bottom p-2 mt-5">
             copyright 2023
