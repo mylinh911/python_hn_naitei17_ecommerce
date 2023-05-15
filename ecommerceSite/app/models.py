@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
 from django.contrib.auth.hashers import  check_password, make_password
+from django.urls import reverse
 
 # Create your models here.
 class Customer(models.Model):
@@ -31,11 +32,16 @@ class Product(models.Model):
     productID = models.AutoField(primary_key=True)
     category = models.ManyToManyField(Category, related_name='product')
     name = models.CharField(max_length=200,null=True)
+    description = models.CharField(max_length=2000,null=True)
     price = models.FloatField()
     image = models.ImageField(null=True,blank=True)
+    featured = models.BooleanField(default=False, null=True, blank=False)
     
     def __str__(self):
         return self.name
+
+    def get_absolute_url(self):
+        return reverse('product-detail', args=[str(self.productID)])
 
     @property
     def ImageURL(self):
@@ -47,15 +53,35 @@ class Product(models.Model):
 
 class Order(models.Model):
     orderID = models.AutoField(primary_key=True)
-    userID = models.ForeignKey(Customer, on_delete=models.CASCADE)
+    customer = models.ForeignKey(Customer, on_delete=models.CASCADE)
     order_date = models.DateTimeField(auto_now_add=True)
-    total_price = models.DecimalField(max_digits=10, decimal_places=2)
     status = models.CharField(max_length=50)  
 
+    def __str__(self):
+        return str(self.pk)
+
+    @property
+    def get_cart_items(self):
+        orderitems = self.orderdetail_set.all()
+        total = sum([item.quantity for item in orderitems])
+        return total
+    @property
+    def get_cart_total(self):
+        orderitems = self.orderdetail_set.all()
+        total = sum([item.get_total for item in orderitems])
+        return total
+
+
 class OrderDetail(models.Model):
-    productID = models.ForeignKey(Product,on_delete=models.SET_NULL, blank=True, null=True)
-    orderID = models.ForeignKey(Order,on_delete=models.SET_NULL, blank=True, null=True)
+    product = models.ForeignKey(Product,on_delete=models.SET_NULL, blank=True, null=True)
+    order = models.ForeignKey(Order,on_delete=models.SET_NULL, blank=True, null=True)
     quantity = models.IntegerField(default=0,null=True,blank=True)
+
+    @property
+    def get_total(self):
+        total = self.product.price * self.quantity
+        return total
+
 
 
 
