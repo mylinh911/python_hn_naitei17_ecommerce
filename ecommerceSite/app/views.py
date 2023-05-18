@@ -1,4 +1,4 @@
-from django.shortcuts import render,redirect
+from django.shortcuts import render,redirect,get_object_or_404
 from django.http import HttpResponse, JsonResponse
 from .models import *
 import json
@@ -7,6 +7,7 @@ from .forms import CustomerForm
 from django.contrib import messages
 from django.contrib.auth import authenticate,login,logout
 from django.utils.translation import get_language, activate, gettext
+from django.views import generic
 
 def check_user_id_in_session(request):
     customer_ids = Customer.objects.values_list('userID', flat=True)
@@ -75,3 +76,53 @@ def logoutPage(request):
     if 'customer_id' in request.session:
         del request.session['customer_id']
     return redirect('login')
+
+def productList(request):
+    customer_ids = Customer.objects.values_list('userID', flat=True)
+    session_values = request.session.values()
+    products = Product.objects.all()
+    for value in session_values:
+        if value in customer_ids:
+            customer = Customer.objects.get(userID=value)
+            user_not_login = "hidden"
+            user_login = "show"
+            context = {'products': products,'user_name':customer.full_name, 'user_not_login':user_not_login, 'user_login':user_login}
+            return render(request,'app/product.html',context)
+    
+    user_not_login = "show"
+    user_login = "hidden"
+    context = {'products': products,'user_not_login':user_not_login, 'user_login':user_login}
+    return render(request,'app/product.html',context)
+
+# def product_detail_view(request, primary_key):
+#     product = get_object_or_404(Product, pk=primary_key)
+#     return render(request, 'app/product_detail.html', context={'product': product})
+
+class ProductDetailView(generic.DetailView):
+    model = Product
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        request = self.request  # Access the request object
+
+        customer_ids = Customer.objects.values_list('userID', flat=True)
+        session_values = request.session.values()
+
+        for value in session_values:
+            if value in customer_ids:
+                customer = Customer.objects.get(userID=value)
+                user_not_login = "hidden"
+                user_login = "show"
+                context['user_name'] = customer.full_name
+                context['user_not_login'] = user_not_login
+                context['user_login'] = user_login
+                return context
+
+        user_not_login = "show"
+        user_login = "hidden"
+        context['user_not_login'] = user_not_login
+        context['user_login'] = user_login
+        return context
+
+    
+
