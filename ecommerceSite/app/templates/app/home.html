@@ -37,7 +37,6 @@
 {% endblock banner_slider %}
 {% block main-content %}
 <hr>
-<a class="nav-link" href="{% url 'login' %}">Đăng nhập</a>
 <div class="container">
   <div class="row" style="width: 100%; display: flex; justify-content: center;">
     {% for product in products %}
@@ -58,3 +57,6 @@
 
 <br /><br /><br />
 {% endblock main-content%}
+{% block language %}
+{% include "app/language.html" with var="" %}
+{% endblock language %}

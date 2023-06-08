@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
 from django.contrib.auth.hashers import  check_password, make_password
+from django.urls import reverse
 
 # Create your models here.
 class Customer(models.Model):
@@ -32,12 +33,16 @@ class Product(models.Model):
     productID = models.AutoField(primary_key=True)
     category = models.ManyToManyField(Category, related_name='product')
     name = models.CharField(max_length=200,null=True)
+    description = models.CharField(max_length=2000,null=True)
     price = models.FloatField()
     image = models.ImageField(null=True,blank=True)
     featured = models.BooleanField(default=False, null=True, blank=False)
     
     def __str__(self):
         return self.name
+
+    def get_absolute_url(self):
+        return reverse('product-detail', args=[str(self.productID)])
 
     @property
     def ImageURL(self):

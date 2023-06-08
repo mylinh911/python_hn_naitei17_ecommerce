@@ -1,0 +1,43 @@
+{% extends 'app/base.html' %}
+{% load static %}
+{% load i18n %}
+{% block product-detail %}
+  <div class="container">
+    <div class="row">
+      <div class="col-md-6">
+        <img style="margin: 0 auto; display: block; width: 350px; height: 350px;" src="{{product.ImageURL}}">
+      </div>
+      <div class="col-md-6">
+        <h2>{{product.name}}</h2>
+        <h5>Phân loại: 
+            {% for category in product.category.all %}
+                <span>{{ category.name }}</span>
+                {% if not forloop.last %}>> {% endif %}
+              {% endfor %}
+            </h5>
+        <p style="text-align: justify;">{{product.description}}</p>
+        <h4>Giá: ${{product.price}}</h4>
+        <button data-product="{{product.id}}" data-action="add" class="btn btn-outline-success add-btn update-cart">{% translate "Thêm vào giỏ hàng" %}</button>
+      </div>
+    </div>
+  </div>
+{% endblock product-detail %}
+{% block language %}
+  <li class="nav-item dropdown">
+    <a class="nav-link dropdown-toggle" href="#" style="white-space: nowrap;" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+      {% translate "Ngôn ngữ" %}
+    </a>
+    <ul class="dropdown-menu">
+        {% get_current_language as LANGUAGE_CODE %}
+        {% get_available_languages as LANGUAGES %}
+        {% get_language_info_list for LANGUAGES as languages %}
+
+        {% for lang in languages%}
+        <li>
+          <a class="dropdown-item" href="/{{ lang.code }}/product/{{product.productID}}">
+            {{ lang.name_local }}
+        </li>
+        {% endfor %}
+    </ul>
+  </li>
+{% endblock language %}
