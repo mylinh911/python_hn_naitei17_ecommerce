@@ -11,7 +11,7 @@
             <img style="margin: 0 auto; display: block; width: 350px; height: 350px;" src="{{product.ImageURL}}">
             <h6><strong>{{product.name}}</strong></h6>  
             <hr>
-            <button data-product="{{product.id}}" data-action="add" class="btn btn-outline-secondary add-btn update-cart">{% translate "Thêm vào giỏ hàng" %}</button>
+            <button data-product="{{product.productID}}" data-action="add" class="btn btn-outline-secondary add-btn update-cart">{% translate "Thêm vào giỏ hàng" %}</button>
             <a class="btn btn-outline-success" href="{{ product.get_absolute_url }}">{% translate "Xem" %}</a>
             <h5 style="display: inline-block; float: right"><strong>${{product.price | floatformat:2 }}</strong></h5>
           </div>

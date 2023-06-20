@@ -13,7 +13,30 @@ from django.contrib.auth.models import User
 from django.template.loader import render_to_string
 import smtplib
 
+# for API 
+from rest_framework import status, viewsets
+from rest_framework.response import Response
+from rest_framework.decorators import api_view
+from .serializers import CustomerSerializer
+from rest_framework.decorators import api_view, authentication_classes, permission_classes
+from rest_framework.permissions import AllowAny
+from rest_framework.views import APIView
 
+class CustomerAPIView(APIView):
+    def get_required_fields(self):
+        serializer = CustomerSerializer()
+        required_fields = [field.field_name for field in serializer.fields.values() if field.required]
+        return required_fields
+
+    def post(self, request, *args, **kwargs):
+        serializer = CustomerSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    def get(self, request, *args, **kwargs):
+        required_fields = self.get_required_fields()
+        return Response({'required_fields': required_fields})
 
 def check_user_id_in_session(request):
     customer_ids = Customer.objects.values_list('userID', flat=True)
@@ -181,12 +204,11 @@ def cart(request):
     user_not_login = "show"
     user_login = "hidden"
     items = []
-    order = Order()
-    cartItems = order.get_cart_items
+    order = []
+    cartItems = []
     context = {
         'items': items,
         'cartItems': cartItems,
-        'order': order,
         'user_not_login': user_not_login,
         'user_login': user_login
     }
