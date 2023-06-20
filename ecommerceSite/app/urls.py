@@ -6,6 +6,10 @@ from rest_framework.routers import DefaultRouter
 # API URLs
 api_patterns = [
     path('v1/register/', views.CustomerAPIView.as_view(), name='register-api'),
+    path('v1/login/', views.CustomerLoginView.as_view(), name='login-api'),
+    path('v1/products/', views.ProductListView.as_view(), name='product-list'),
+    path('v1/order/', views.OrderPlacementAPIView.as_view(), name='order-api'),
+    path('v1/accept-order/<int:order_id>/', views.AcceptOrderView.as_view(), name='accept-order-api'),
 ]
 
 # Web URLs

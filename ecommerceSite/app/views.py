@@ -12,15 +12,17 @@ from django.contrib.auth.models import User
 # from ecommerceSite.settings import EMAIL_HOST_USER
 from django.template.loader import render_to_string
 import smtplib
+from django.contrib.sessions.backends.db import SessionStore
 
 # for API 
 from rest_framework import status, viewsets
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
-from .serializers import CustomerSerializer
+from .serializers import CustomerSerializer, CustomerLoginSerializer, ProductSerializer, OrderDetailSerializer, OrderSerializer, AcceptOrderSerializer
 from rest_framework.decorators import api_view, authentication_classes, permission_classes
 from rest_framework.permissions import AllowAny
 from rest_framework.views import APIView
+from django.contrib.sessions.models import Session
 
 class CustomerAPIView(APIView):
     def get_required_fields(self):
@@ -38,6 +40,103 @@ class CustomerAPIView(APIView):
         required_fields = self.get_required_fields()
         return Response({'required_fields': required_fields})
 
+class CustomerLoginView(APIView):
+    def get_required_fields(self):
+        serializer = CustomerLoginSerializer()
+        required_fields = [field.field_name for field in serializer.fields.values() if field.required]
+        return required_fields
+
+    def get(self, request, *args, **kwargs):
+        required_fields = self.get_required_fields()
+        return Response({'required_fields': required_fields})
+
+    def post(self, request):
+        serializer = CustomerLoginSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        
+        user_name = serializer.validated_data['user_name']
+        password = serializer.validated_data['password']
+        
+        user = authenticate(request, user_name=user_name, password=password)
+        
+        if user is not None:
+            login(request, user)
+            session = SessionStore()
+            session.create()
+            session['customer_id'] = user.customer.userID
+            session.save()
+            return Response({'message': 'Đăng nhập thành công.', 'session_id': session.session_key})
+
+        try:
+            customer = Customer.objects.get(user_name=user_name)
+            if customer.check_password(password):
+                request.session['customer_id'] = customer.userID
+                return Response({'message': 'Đăng nhập thành công.', 'session_id': request.session.session_key})
+            else:
+                return Response({'message': 'Mật khẩu không hợp lệ.'}, status=status.HTTP_401_UNAUTHORIZED)
+        except Customer.DoesNotExist:
+            return Response({'message': 'Khách hàng không tồn tại.'}, status=status.HTTP_404_NOT_FOUND)
+
+class ProductListView(APIView):
+    def get(self, request):
+        category_id = request.GET.get('category')
+        min_price = request.GET.get('min_price')
+        max_price = request.GET.get('max_price')
+        featured_only = request.GET.get('featured_only')
+
+        products = Product.objects.all()
+
+        if category_id:
+            products = products.filter(category__id=category_id)
+
+
+        if featured_only:
+            products = products.filter(featured=True)
+
+        serializer = ProductSerializer(products, many=True)
+
+        return Response(serializer.data)
+
+class OrderPlacementAPIView(APIView):
+    def get(self, request):
+        serializer = OrderSerializer()
+        required_fields = serializer.get_required_fields()
+        return Response(required_fields, status=status.HTTP_200_OK)
+        
+    def post(self, request):
+        serializer = OrderSerializer(data=request.data, context={'request': request})
+        if serializer.is_valid():
+            order = serializer.save()
+
+            order.status = 'pending'  
+            order.save()
+
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        
+class AcceptOrderView(APIView):
+    def get(self, request, order_id):
+        try:
+            order = Order.objects.get(orderID=order_id)
+            serializer = AcceptOrderSerializer(order)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except Order.DoesNotExist:
+            return Response({'message': 'Order not found'}, status=status.HTTP_404_NOT_FOUND)
+    
+    def put(self, request, order_id):
+        try:
+            order = Order.objects.get(orderID=order_id)
+        except Order.DoesNotExist:
+            return Response({'message': 'Order not found'}, status=status.HTTP_404_NOT_FOUND)
+        
+        if order.status != 'pending':
+            return Response({'message': 'Order status cannot be changed'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        order.status = 'shipped'
+        order.save()
+        
+        return Response({'message': 'Order status updated to shipped'}, status=status.HTTP_200_OK)
+        
 def check_user_id_in_session(request):
     customer_ids = Customer.objects.values_list('userID', flat=True)
     session_values = request.session.values()
@@ -116,9 +215,12 @@ def loginPage(request):
     else:
         return render(request, 'app/login.html', { 'user_not_login':user_not_login, 'user_login':user_login})
 
-
 def logoutPage(request):
     Order.objects.filter(status='demo').delete()
+    if request.user.is_authenticated:
+        logout(request)
+        return redirect('login')
+
     if 'customer_id' in request.session:
         del request.session['customer_id']
     return redirect('login')
@@ -259,7 +361,6 @@ def checkoutDemo(request):
         OrderDetail.objects.create(order=order, product=product, quantity=quantity)
 
     return JsonResponse({'status': 'success'})
-
 
 def checkout(request):
     user_not_login = "hidden"
@@ -424,5 +525,3 @@ class OrderDetailView(generic.DetailView):
                 orders = Order.objects.filter(customer=customer).exclude(status__in=['demo', 'cart'])
                 context = { 'orders': orders,'user_name':customer.full_name, 'user_not_login':user_not_login, 'user_login':user_login}
                 return render(request,'app/orderlist.html',context)
-
-
