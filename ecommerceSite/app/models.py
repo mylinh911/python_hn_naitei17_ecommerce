@@ -63,7 +63,7 @@ class Order(models.Model):
     ]
 
     orderID = models.AutoField(primary_key=True)
-    userID = models.ForeignKey(Customer, on_delete=models.CASCADE)
+    customer = models.ForeignKey(Customer, on_delete=models.CASCADE)
     order_date = models.DateTimeField(auto_now_add=True)
     status = models.CharField(max_length=50, choices=ORDER_STATUS_CHOICES, default='cart') 
     shipping_address = models.CharField(max_length=100, default='')
@@ -99,8 +99,8 @@ class Order(models.Model):
 
 
 class OrderDetail(models.Model):
-    productID = models.ForeignKey(Product,on_delete=models.SET_NULL, blank=True, null=True)
-    orderID = models.ForeignKey(Order,on_delete=models.SET_NULL, blank=True, null=True)
+    product = models.ForeignKey(Product,on_delete=models.SET_NULL, blank=True, null=True)
+    order = models.ForeignKey(Order,on_delete=models.SET_NULL, blank=True, null=True)
     quantity = models.IntegerField(default=0,null=True,blank=True)
 
     @property
